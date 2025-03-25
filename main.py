@@ -6,6 +6,7 @@ from watchdog.events import FileSystemEventHandler
 from supabase import create_client, Client
 from dotenv import load_dotenv
 import logging
+from excel_updater import run_excel_updater
 
 # Configure logging
 logging.basicConfig(
@@ -93,7 +94,10 @@ class CSVHandler(FileSystemEventHandler):
             logger.error(f"Error processing file {event.src_path}: {str(e)}")
 
 def main():
-    # Create event handler
+    # Start Excel updater in a separate thread
+    excel_thread = run_excel_updater()
+    
+    # Create event handler for CSV monitoring
     event_handler = CSVHandler()
     
     # Create observer
@@ -116,7 +120,7 @@ def main():
             time.sleep(0.01)  # Check every 10ms
     except KeyboardInterrupt:
         observer.stop()
-        logger.info("Stopped monitoring.")
+        logger.info("Stopping monitoring.")
     
     observer.join()
 
