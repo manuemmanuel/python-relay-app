@@ -5,7 +5,7 @@ import time
 import os
 
 # Configuration
-SERIAL_PORT = '/dev/ttyACM0'
+SERIAL_PORT = '/dev/ttyACM0' #  /dev/ttyACM0
 BAUD_RATE = 115200
 BASE_DIR =  "/home/rahul/Desktop/Project" # Base project directory
 

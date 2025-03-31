@@ -5,8 +5,9 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 import logging
 from openpyxl import load_workbook
+import threading
 
-# Configure logging with more detailed format
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
@@ -85,17 +86,60 @@ def update_parameters(xlsx_path):
         logger.error(f"Error updating parameters: {str(e)}")
         logger.error("Full error details:", exc_info=True)
 
-def main():
-    xlsx_path = "User Data Input.xlsx"
-    logger.info(f"Starting parameter update service for {xlsx_path}")
-    logger.info("Monitoring for parameter changes...")
+def update_relay_status(xlsx_path):
+    try:
+        # Load Excel workbook
+        wb = load_workbook(xlsx_path)
+        ws = wb.active
+        
+        # Get the latest values from Excel
+        data = {
+            'timestamp': pd.Timestamp.now().isoformat(),
+            'relay_status': ws['B1'].value if ws['B1'].value else 'Unknown',
+            'input_status': ws['B2'].value if ws['B2'].value else 'Unknown',
+            'output_status': ws['B3'].value if ws['B3'].value else 'Unknown',
+            'circuit_breaker_status': ws['B4'].value if ws['B4'].value else 'Unknown',
+            'fault_type': ws['B5'].value if ws['B5'].value else 'None'
+        }
+
+        try:
+            # Get existing row if any
+            result = supabase.table('device_status').select('id').execute()
+            
+            if result.data:
+                # Update existing row
+                row_id = result.data[0]['id']
+                supabase.table('device_status').update(data).eq('id', row_id).execute()
+                logger.info(f"Updated device status with timestamp: {data['timestamp']}")
+            else:
+                # Insert new row
+                result = supabase.table('device_status').insert(data).execute()
+                logger.info(f"Inserted new device status with timestamp: {data['timestamp']}")
+                
+        except Exception as e:
+            logger.error(f"Error updating device_status table: {str(e)}")
+            
+    except Exception as e:
+        logger.error(f"Error processing Relay_indication.xlsx: {str(e)}")
+
+def start_monitoring():
+    params_path = "User Data Input.xlsx"
+    relay_path = "Relay_indication.xlsx"
+    
+    logger.info(f"Starting monitoring service for:\n{params_path}\n{relay_path}")
     
     try:
         while True:
-            update_parameters(xlsx_path)
+            update_parameters(params_path)
+            update_relay_status(relay_path)
             time.sleep(1)  # Check every second
     except KeyboardInterrupt:
-        logger.info("Stopping parameter update service")
+        logger.info("Stopping monitoring service")
+
+def run_excel_updater():
+    excel_thread = threading.Thread(target=start_monitoring, daemon=True)
+    excel_thread.start()
+    return excel_thread
 
 if __name__ == "__main__":
-    main()
+    start_monitoring()

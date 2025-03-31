@@ -5,13 +5,17 @@ import time
 import csv
 import os
 
-def setup_pins(input_pin, output_pin,led_input,led_output,relay_active):
+def setup_pins(input_trip_pin, output_trip_pin,led_input,led_output,relay_active,trip_button_pin=None, reset_button_pin=None):
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(input_pin, GPIO.OUT, initial=GPIO.HIGH)
-    GPIO.setup(output_pin, GPIO.OUT, initial=GPIO.HIGH)
+    GPIO.setup(input_trip_pin, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(output_trip_pin, GPIO.OUT, initial=GPIO.LOW)
     GPIO.setup(led_input, GPIO.OUT, initial=GPIO.LOW)
     GPIO.setup(led_output, GPIO.OUT, initial=GPIO.LOW)
     GPIO.setup(relay_active, GPIO.OUT, initial=GPIO.HIGH)
+    if trip_button_pin is not None:
+        GPIO.setup(trip_button_pin, GPIO.IN)
+    if reset_button_pin is not None:
+        GPIO.setup(reset_button_pin, GPIO.IN)
 
 def main():
     input_trip_pin = 11  # Input Relay Pin
@@ -19,8 +23,10 @@ def main():
     led_input = 15  # Input Trip Indication
     led_output = 16 # Output Trip Indication
     relay_active = 13 # Relay Active Indication
+    trip_button_pin = 21  # trip button pin
+    reset_button_pin = 22  # reset button pin
 
-    setup_pins(input_trip_pin, output_trip_pin, led_input, led_output, relay_active)
+    setup_pins(input_trip_pin, output_trip_pin, led_input, led_output, relay_active, trip_button_pin, reset_button_pin)
 
 def create_fault_log():
     """Creates an Excel and CSV file with predefined headers if they don't exist."""
@@ -282,16 +288,19 @@ def read_output_csv(file_path):
         print(f"Output CSV Read Error: {e}")
         return None, None, None, None
 
-def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, input_trip_pin=11, output_trip_pin=13, interval=1):
+def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, input_trip_pin=11, output_trip_pin=12, interval=1):
     """Continuously reads Excel and CSV files, updates variables, and performs checks."""
     input_trip_pin = 11  # Input Relay Pin
     output_trip_pin = 12 # Output Relay Pin
     led_input = 15  # Input Trip Indication
     led_output = 16 # Output Trip Indication
     relay_active = 13 # Relay Active Indication
+    trip_button_pin = 21  # trip button pin
+    reset_button_pin = 22  # reset button pin
 
-    setup_pins(input_trip_pin, output_trip_pin, led_input, led_output, relay_active)
-
+    setup_pins(input_trip_pin, output_trip_pin, led_input, led_output, relay_active, trip_button_pin, reset_button_pin)
+    trip_button_pressed_time = None  # Track trip button press duration
+    
     try:
         while True:
             # Read Excel file
@@ -343,12 +352,48 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
             breaker_status = "Live"
             fault_type = "None"
             
+            # --- Add Trip Button Handling (3-second hold) ---
+            current_time = time.time()
+            trip_btn_state = GPIO.input(trip_button_pin)
+            if trip_btn_state == GPIO.LOW:  # Button pressed
+                if trip_button_pressed_time is None:
+                    trip_button_pressed_time = current_time  # Start timer
+                elif current_time - trip_button_pressed_time >= 3:  # Held for 3 seconds
+                    # Trip relays
+                    GPIO.output(input_trip_pin, GPIO.HIGH)
+                    GPIO.output(output_trip_pin, GPIO.HIGH)
+                    GPIO.output(led_input, GPIO.HIGH)
+                    GPIO.output(led_output, GPIO.HIGH)
+                    relay_status = "Unhealthy"
+                    breaker_status = "Trip"
+                    fault_type = "Manual Trip (Button)"
+                    update_fault_log(relay_status, input_status, output_status, breaker_status, fault_type)
+                    print("button trip")
+                    trip_button_pressed_time = None  # Reset timer
+            else:
+                trip_button_pressed_time = None  # Button not pressed
+
+            # --- Add Reset Button Handling (immediate press) ---
+            reset_btn_state = GPIO.input(reset_button_pin)
+            if reset_btn_state == GPIO.LOW:
+                # Reset relays and statuses
+                GPIO.output(input_trip_pin, GPIO.LOW)
+                GPIO.output(output_trip_pin, GPIO.LOW)
+                GPIO.output(led_input, GPIO.LOW)
+                GPIO.output(led_output, GPIO.LOW)
+                relay_status = "Healthy and Operational"
+                input_status = "Healthy"
+                output_status = "Healthy"
+                breaker_status = "Rest"
+                fault_type = "Manual Rest"
+                update_fault_log(relay_status, input_status, output_status, breaker_status, fault_type)
+                print("Reset physical button")
 
   
             if Trip_button == 1:
                 print("trip Button Activated")
-                GPIO.output(input_trip_pin, GPIO.LOW)
-                GPIO.output(output_trip_pin, GPIO.LOW)
+                GPIO.output(input_trip_pin, GPIO.HIGH)
+                GPIO.output(output_trip_pin, GPIO.HIGH)
                 GPIO.output(led_input, GPIO.HIGH)
                 GPIO.output(led_output, GPIO.HIGH)
                 relay_status = "Unhealthy"    # ✅ Add these lines
@@ -360,7 +405,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
             if Instantaneous_Trip_Characteristics_status == 1:
                
                # Input Phase A Overcurrent
-               if input_phase_a_over_current_status == 1:
+               if input_phase_a_over_current_status == 1 and Inverse_Time_Characteristics_status == 0:
                   
                   if input_A_Phase_Current is not None and input_phase_a_over_current_set_value is not None:
                     try:
@@ -369,7 +414,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
 
                         if input_A_Phase_Current >= input_phase_a_over_current_set_value:
                            print("trip on - Input Phase A Overcurrent")
-                           GPIO.output(input_trip_pin, GPIO.LOW)
+                           GPIO.output(input_trip_pin, GPIO.HIGH)
                            GPIO.output(led_input, GPIO.HIGH)
                            input_status = "Unhealthy"
                            breaker_status = "Trip"
@@ -379,7 +424,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                        print(f"Conversion Error: {e} - Check if input values are valid numbers.")
 
                 # Input Phase B Overcurrent
-               if input_phase_b_over_current_status == 1:
+               if input_phase_b_over_current_status == 1 and Inverse_Time_Characteristics_status == 0:
                
                    if input_B_Phase_Current is not None and input_phase_b_over_current_set_value is not None:
                    
@@ -389,7 +434,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
 
                        if input_B_Phase_Current >= input_phase_b_over_current_set_value:
                           print("trip on - Input Phase B Overcurrent")
-                          GPIO.output(input_trip_pin, GPIO.LOW)
+                          GPIO.output(input_trip_pin, GPIO.HIGH)
                           GPIO.output(led_input, GPIO.HIGH)
                           input_status = "Unhealthy"
                           breaker_status = "Trip"
@@ -399,14 +444,14 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         print(f"Conversion Error: {e} - Check if input values are valid numbers.")
 
                 # Input Phase C Overcurrent
-               if input_phase_c_over_current_status == 1:
+               if input_phase_c_over_current_status == 1 and Inverse_Time_Characteristics_status == 0:
                   if input_C_Phase_Current is not None and input_phase_c_over_current_set_value is not None:
                     try:
                        input_C_Phase_Current = float(input_C_Phase_Current)
                        input_phase_c_over_current_set_value = float(input_phase_c_over_current_set_value)
                        if input_C_Phase_Current >= input_phase_c_over_current_set_value:
                           print("trip on - Input Phase C Overcurrent")
-                          GPIO.output(input_trip_pin, GPIO.LOW)
+                          GPIO.output(input_trip_pin, GPIO.HIGH)
                           GPIO.output(led_input, GPIO.HIGH)
                           input_status = "Unhealthy"
                           breaker_status = "Trip"
@@ -416,14 +461,14 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                       print(f"Conversion Error: {e} - Check if input values are valid numbers.")
 
                 # Input DC Over Current
-               if input_dc_over_current_status == 1:
+               if input_dc_over_current_status == 1 and Inverse_Time_Characteristics_status == 0:
                   if input_DC_Current is not None and input_dc_over_current_set_value is not None:
                      try:
                        input_DC_Current = float(input_DC_Current)
                        input_dc_over_current_set_value = float(input_dc_over_current_set_value)
                        if input_DC_Current >= input_dc_over_current_set_value:
                          print("trip on - Input DC Over Current")
-                         GPIO.output(input_trip_pin, GPIO.LOW)
+                         GPIO.output(input_trip_pin, GPIO.HIGH)
                          GPIO.output(led_input, GPIO.HIGH)
                          input_status = "Unhealthy"
                          breaker_status = "Trip"
@@ -440,7 +485,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         input_over_temperature_set_value = float(input_over_temperature_set_value)
                         if input_Temperature >= input_over_temperature_set_value:
                            print("trip on - Input Over Temperature")
-                           GPIO.output(input_trip_pin, GPIO.LOW)
+                           GPIO.output(input_trip_pin, GPIO.HIGH)
                            GPIO.output(led_input, GPIO.HIGH)
                            input_status = "Unhealthy"
                            breaker_status = "Trip"
@@ -457,7 +502,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         input_phase_a_over_voltage_set_value = float(input_phase_a_over_voltage_set_value)
                         if input_A_Phase_Voltage >= input_phase_a_over_voltage_set_value:
                           print("trip on - Input Phase A Overvoltage")
-                          GPIO.output(input_trip_pin, GPIO.LOW)
+                          GPIO.output(input_trip_pin, GPIO.HIGH)
                           GPIO.output(led_input, GPIO.HIGH)
                           input_status = "Unhealthy"
                           breaker_status = "Trip"
@@ -474,7 +519,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                        input_phase_b_over_voltage_set_value = float(input_phase_b_over_voltage_set_value)
                        if input_B_Phase_Voltage >= input_phase_b_over_voltage_set_value:
                           print("trip on - Input Phase B Overvoltage")
-                          GPIO.output(input_trip_pin, GPIO.LOW)
+                          GPIO.output(input_trip_pin, GPIO.HIGH)
                           GPIO.output(led_input, GPIO.HIGH)
                           input_status = "Unhealthy"
                           breaker_status = "Trip"
@@ -491,7 +536,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         input_phase_c_over_voltage_set_value = float(input_phase_c_over_voltage_set_value)
                         if input_C_Phase_Voltage >= input_phase_c_over_voltage_set_value:
                           print("trip on - Input Phase C Overvoltage")
-                          GPIO.output(input_trip_pin, GPIO.LOW)
+                          GPIO.output(input_trip_pin, GPIO.HIGH)
                           GPIO.output(led_input, GPIO.HIGH)
                           input_status = "Unhealthy"
                           breaker_status = "Trip"
@@ -508,7 +553,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         input_phase_a_under_voltage_set_value = float(input_phase_a_under_voltage_set_value)
                         if input_A_Phase_Voltage <= input_phase_a_under_voltage_set_value:
                            print("trip on - Input Phase A Undervoltage")
-                           GPIO.output(input_trip_pin, GPIO.LOW)
+                           GPIO.output(input_trip_pin, GPIO.HIGH)
                            GPIO.output(led_input, GPIO.HIGH)
                            input_status = "Unhealthy"
                            breaker_status = "Trip"
@@ -525,7 +570,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         input_phase_b_under_voltage_set_value = float(input_phase_b_under_voltage_set_value)
                         if input_B_Phase_Voltage <= input_phase_b_under_voltage_set_value:
                            print("trip on - Input Phase B Undervoltage")
-                           GPIO.output(input_trip_pin, GPIO.LOW)
+                           GPIO.output(input_trip_pin, GPIO.HIGH)
                            GPIO.output(led_input, GPIO.HIGH)
                            input_status = "Unhealthy"
                            breaker_status = "Trip"
@@ -542,7 +587,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         input_phase_c_under_voltage_set_value = float(input_phase_c_under_voltage_set_value)
                         if input_C_Phase_Voltage <= input_phase_c_under_voltage_set_value:
                           print("trip on - Input Phase C Undervoltage")
-                          GPIO.output(input_trip_pin, GPIO.LOW)
+                          GPIO.output(input_trip_pin, GPIO.HIGH)
                           GPIO.output(led_input, GPIO.HIGH)
                           input_status = "Unhealthy"
                           breaker_status = "Trip"
@@ -559,7 +604,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                        input_dc_over_voltage_set_value = float(input_dc_over_voltage_set_value)
                        if input_DC_Voltage >= input_dc_over_voltage_set_value:
                          print("trip on - Input DC Over Voltage")
-                         GPIO.output(input_trip_pin, GPIO.LOW)
+                         GPIO.output(input_trip_pin, GPIO.HIGH)
                          GPIO.output(led_input, GPIO.HIGH)
                          input_status = "Unhealthy"
                          breaker_status = "Trip"
@@ -576,7 +621,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                        input_dc_under_voltage_set_value = float(input_dc_under_voltage_set_value)
                        if input_DC_Voltage <= input_dc_under_voltage_set_value:
                          print("trip on - Input DC Under Voltage")
-                         GPIO.output(input_trip_pin, GPIO.LOW)
+                         GPIO.output(input_trip_pin, GPIO.HIGH)
                          GPIO.output(led_input, GPIO.HIGH)
                          input_status = "Unhealthy"
                          breaker_status = "Trip"
@@ -593,7 +638,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         input_over_frequency_set_value = float(input_over_frequency_set_value)
                         if input_Frequency >= input_over_frequency_set_value:
                            print("trip on - Input Over Frequency")
-                           GPIO.output(input_trip_pin, GPIO.LOW)
+                           GPIO.output(input_trip_pin, GPIO.HIGH)
                            GPIO.output(led_input, GPIO.HIGH)
                            input_status = "Unhealthy"
                            breaker_status = "Trip"
@@ -610,7 +655,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         input_under_frequency_set_value = float(input_under_frequency_set_value)
                         if input_Frequency <= input_under_frequency_set_value:
                            print("trip on - Input Under Frequency")
-                           GPIO.output(input_trip_pin, GPIO.LOW)
+                           GPIO.output(input_trip_pin, GPIO.HIGH)
                            GPIO.output(led_input, GPIO.HIGH)
                            input_status = "Unhealthy"
                            breaker_status = "Trip"
@@ -623,14 +668,14 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
              # ========================= OUTPUT RELAY LOGIC FOR INSTANTANEOUS TRIPING =========================
 
                 #   Output Phase A Overcurrent
-               if output_phase_a_over_current_status == 1:
+               if output_phase_a_over_current_status == 1 and Inverse_Time_Characteristics_status == 0:
                   if output_A_Phase_Current is not None and output_phase_a_over_current_set_value is not None:
                      try:
                          output_A_Phase_Current = float(output_A_Phase_Current)
                          output_phase_a_over_current_set_value = float(output_phase_a_over_current_set_value)
                          if output_A_Phase_Current >= output_phase_a_over_current_set_value:
                             print("trip on - Output Phase A Overcurrent")
-                            GPIO.output(output_trip_pin, GPIO.LOW)
+                            GPIO.output(output_trip_pin, GPIO.HIGH)
                             GPIO.output(led_output, GPIO.HIGH)
                             output_status = "Unhealthy"
                             breaker_status = "Trip"
@@ -640,14 +685,14 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                             print(f"Conversion Error: {e} - Check if output values are valid numbers.")
 
                 # Phase B Overcurrent
-               if output_phase_b_over_current_status == 1:
+               if output_phase_b_over_current_status == 1 and Inverse_Time_Characteristics_status == 0:
                   if output_B_Phase_Current is not None and output_phase_b_over_current_set_value is not None:
                      try:
                          output_B_Phase_Current = float(output_B_Phase_Current)
                          output_phase_b_over_current_set_value = float(output_phase_b_over_current_set_value)
                          if output_B_Phase_Current >= output_phase_b_over_current_set_value:
                             print("trip on - Output Phase B Overcurrent")
-                            GPIO.output(output_trip_pin, GPIO.LOW)
+                            GPIO.output(output_trip_pin, GPIO.HIGH)
                             GPIO.output(led_output, GPIO.HIGH)
                             output_status = "Unhealthy"
                             breaker_status = "Trip"
@@ -657,14 +702,14 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                           print(f"Conversion Error: {e} - Check if output values are valid numbers.")
 
                 # Phase C Overcurrent
-               if output_phase_c_over_current_status == 1:
+               if output_phase_c_over_current_status == 1 and Inverse_Time_Characteristics_status == 0:
                   if output_C_Phase_Current is not None and output_phase_c_over_current_set_value is not None:
                       try:
                          output_C_Phase_Current = float(output_C_Phase_Current)
                          output_phase_c_over_current_set_value = float(output_phase_c_over_current_set_value)
                          if output_C_Phase_Current >= output_phase_c_over_current_set_value:
                             print("trip on - Output Phase C Overcurrent")
-                            GPIO.output(output_trip_pin, GPIO.LOW)
+                            GPIO.output(output_trip_pin, GPIO.HIGH)
                             GPIO.output(led_output, GPIO.HIGH)
                             output_status = "Unhealthy"
                             breaker_status = "Trip"
@@ -674,14 +719,14 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                            print(f"Conversion Error: {e} - Check if output values are valid numbers.")
  
                 # DC Over Current
-               if output_dc_over_current_status == 1:
+               if output_dc_over_current_status == 1 and Inverse_Time_Characteristics_status == 0:
                   if output_DC_Current is not None and output_dc_over_current_set_value is not None:
                      try:
                          output_DC_Current = float(output_DC_Current)
                          output_dc_over_current_set_value = float(output_dc_over_current_set_value)
                          if output_DC_Current >= output_dc_over_current_set_value:
                             print("trip on - Output DC Over Current")
-                            GPIO.output(output_trip_pin, GPIO.LOW)
+                            GPIO.output(output_trip_pin, GPIO.HIGH)
                             GPIO.output(led_output, GPIO.HIGH)
                             output_status = "Unhealthy"
                             breaker_status = "Trip"
@@ -698,7 +743,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         output_over_temperature_set_value = float(output_over_temperature_set_value)
                         if output_Temperature >= output_over_temperature_set_value:
                            print("trip on - Output Over Temperature")
-                           GPIO.output(output_trip_pin, GPIO.LOW)
+                           GPIO.output(output_trip_pin, GPIO.HIGH)
                            GPIO.output(led_output, GPIO.HIGH)
                            output_status = "Unhealthy"
                            breaker_status = "Trip"
@@ -716,7 +761,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         output_phase_a_over_voltage_set_value = float(output_phase_a_over_voltage_set_value)
                         if output_A_Phase_Voltage >= output_phase_a_over_voltage_set_value:
                            print("trip on - Output Phase A Overvoltage")
-                           GPIO.output(output_trip_pin, GPIO.LOW)
+                           GPIO.output(output_trip_pin, GPIO.HIGH)
                            GPIO.output(led_output, GPIO.HIGH)
                            output_status = "Unhealthy"
                            breaker_status = "Trip"
@@ -733,7 +778,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                           output_phase_b_over_voltage_set_value = float(output_phase_b_over_voltage_set_value)
                           if output_B_Phase_Voltage >= output_phase_b_over_voltage_set_value:
                             print("trip on - Output Phase B Overvoltage")
-                            GPIO.output(output_trip_pin, GPIO.LOW)
+                            GPIO.output(output_trip_pin, GPIO.HIGH)
                             GPIO.output(led_output, GPIO.HIGH)
                             output_status = "Unhealthy"
                             breaker_status = "Trip"
@@ -750,7 +795,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                           output_phase_c_over_voltage_set_value = float(output_phase_c_over_voltage_set_value)
                           if output_C_Phase_Voltage >= output_phase_c_over_voltage_set_value:
                              print("trip on - Output Phase C Overvoltage")
-                             GPIO.output(output_trip_pin, GPIO.LOW)
+                             GPIO.output(output_trip_pin, GPIO.HIGH)
                              GPIO.output(led_output, GPIO.HIGH)
                              output_status = "Unhealthy"
                              breaker_status = "Trip"
@@ -767,7 +812,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          output_phase_a_under_voltage_set_value = float(output_phase_a_under_voltage_set_value)
                          if output_A_Phase_Voltage <= output_phase_a_under_voltage_set_value:
                                print("trip on - Output Phase A Undervoltage")
-                               GPIO.output(output_trip_pin, GPIO.LOW)
+                               GPIO.output(output_trip_pin, GPIO.HIGH)
                                GPIO.output(led_output, GPIO.HIGH)
                                output_status = "Unhealthy"
                                breaker_status = "Trip"
@@ -784,7 +829,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          output_phase_b_under_voltage_set_value = float(output_phase_b_under_voltage_set_value)
                          if output_B_Phase_Voltage <= output_phase_b_under_voltage_set_value:
                             print("trip on - Output Phase B Undervoltage")
-                            GPIO.output(output_trip_pin, GPIO.LOW)
+                            GPIO.output(output_trip_pin, GPIO.HIGH)
                             GPIO.output(led_output, GPIO.HIGH)
                             output_status = "Unhealthy"
                             breaker_status = "Trip"
@@ -801,7 +846,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          output_phase_c_under_voltage_set_value = float(output_phase_c_under_voltage_set_value)
                          if output_C_Phase_Voltage <= output_phase_c_under_voltage_set_value:
                             print("trip on - Output Phase C Undervoltage")
-                            GPIO.output(output_trip_pin, GPIO.LOW)
+                            GPIO.output(output_trip_pin, GPIO.HIGH)
                             GPIO.output(led_output, GPIO.HIGH)
                             output_status = "Unhealthy"
                             breaker_status = "Trip"
@@ -818,7 +863,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                        output_dc_over_voltage_set_value = float(output_dc_over_voltage_set_value)
                        if output_DC_Voltage >= output_dc_over_voltage_set_value:
                          print("trip on - Output DC Over Voltage")
-                         GPIO.output(output_trip_pin, GPIO.LOW)
+                         GPIO.output(output_trip_pin, GPIO.HIGH)
                          GPIO.output(led_output, GPIO.HIGH)
                          output_status = "Unhealthy"
                          breaker_status = "Trip"
@@ -835,7 +880,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                        output_dc_under_voltage_set_value = float(output_dc_under_voltage_set_value)
                        if output_DC_Voltage <= output_dc_under_voltage_set_value:
                          print("trip on - Output DC Under Voltage")
-                         GPIO.output(output_trip_pin, GPIO.LOW)
+                         GPIO.output(output_trip_pin, GPIO.HIGH)
                          GPIO.output(led_output, GPIO.HIGH)
                          output_status = "Unhealthy"
                          breaker_status = "Trip"
@@ -853,7 +898,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                         output_over_frequency_set_value = float(output_over_frequency_set_value)
                         if output_Frequency >= output_over_frequency_set_value:
                            print("trip on - Output Over Frequency")
-                           GPIO.output(output_trip_pin, GPIO.LOW)
+                           GPIO.output(output_trip_pin, GPIO.HIGH)
                            GPIO.output(led_output, GPIO.HIGH)
                            output_status = "Unhealthy"
                            breaker_status = "Trip"
@@ -870,7 +915,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          output_under_frequency_set_value = float(output_under_frequency_set_value)
                          if output_Frequency <= output_under_frequency_set_value:
                             print("trip on - Output Under Frequency")
-                            GPIO.output(output_trip_pin, GPIO.LOW)
+                            GPIO.output(output_trip_pin, GPIO.HIGH)
                             GPIO.output(led_output, GPIO.HIGH)
                             output_status = "Unhealthy"
                             breaker_status = "Trip"
@@ -893,7 +938,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          if input_A_Phase_Current >= 20 * input_phase_a_over_current_set_value:
                              print("Input Phase A Overcurrent (20x) detected! Waiting 0.5 sec before trip.")
                              time.sleep(0.5)
-                             GPIO.output(input_trip_pin, GPIO.LOW)
+                             GPIO.output(input_trip_pin, GPIO.HIGH)
                              GPIO.output(led_input, GPIO.HIGH)
                              print("trip on - Input Phase A Overcurrent")
                              input_status = "Unhealthy"
@@ -903,7 +948,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_A_Phase_Current >= 10 * input_phase_a_over_current_set_value:
                               print("Input Phase A Overcurrent (10x) detected! Waiting 1 sec before trip.")
                               time.sleep(1)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase A Overcurrent")
                               input_status = "Unhealthy"
@@ -913,7 +958,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_A_Phase_Current >= 5 * input_phase_a_over_current_set_value:
                               print("Input Phase A Overcurrent (5x) detected! Waiting 2.5 sec before trip.")
                               time.sleep(2.5)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase A Overcurrent")
                               input_status = "Unhealthy"
@@ -923,7 +968,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_A_Phase_Current >= 2 * input_phase_a_over_current_set_value:
                               print("Input Phase A Overcurrent (2x) detected! Waiting 5 sec before trip.")
                               time.sleep(5)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase A Overcurrent")
                               input_status = "Unhealthy"
@@ -933,7 +978,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_A_Phase_Current >= input_phase_a_over_current_set_value:
                               print("Input Phase A Overcurrent detected! Waiting 10 sec before trip.")
                               time.sleep(10)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase A Overcurrent")
                               input_status = "Unhealthy"
@@ -953,7 +998,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          if input_B_Phase_Current >= 20 * input_phase_b_over_current_set_value:
                              print("Input Phase B Overcurrent (20x) detected! Waiting 0.5 sec before trip.")
                              time.sleep(0.5)
-                             GPIO.output(input_trip_pin, GPIO.LOW)
+                             GPIO.output(input_trip_pin, GPIO.HIGH)
                              GPIO.output(led_input, GPIO.HIGH)
                              print("trip on - Input Phase B Overcurrent")
                              input_status = "Unhealthy"
@@ -963,7 +1008,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_B_Phase_Current >= 10 * input_phase_b_over_current_set_value:
                               print("Input Phase B Overcurrent (10x) detected! Waiting 1 sec before trip.")
                               time.sleep(1)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase B Overcurrent")
                               input_status = "Unhealthy"
@@ -973,7 +1018,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_B_Phase_Current >= 5 * input_phase_b_over_current_set_value:
                               print("Input Phase B Overcurrent (5x) detected! Waiting 2.5 sec before trip.")
                               time.sleep(2.5)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase B Overcurrent")
                               input_status = "Unhealthy"
@@ -983,7 +1028,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_B_Phase_Current >= 2 * input_phase_b_over_current_set_value:
                               print("Input Phase B Overcurrent (2x) detected! Waiting 5 sec before trip.")
                               time.sleep(5)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase B Overcurrent")
                               input_status = "Unhealthy"
@@ -993,7 +1038,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_B_Phase_Current >= input_phase_b_over_current_set_value:
                               print("Input Phase B Overcurrent detected! Waiting 10 sec before trip.")
                               time.sleep(10)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase B Overcurrent")
                               input_status = "Unhealthy"
@@ -1013,7 +1058,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          if input_C_Phase_Current >= 20 * input_phase_c_over_current_set_value:
                              print("Input Phase C Overcurrent (20x) detected! Waiting 0.5 sec before trip.")
                              time.sleep(0.5)
-                             GPIO.output(input_trip_pin, GPIO.LOW)
+                             GPIO.output(input_trip_pin, GPIO.HIGH)
                              GPIO.output(led_input, GPIO.HIGH)
                              print("trip on - Input Phase C Overcurrent")
                              input_status = "Unhealthy"
@@ -1023,7 +1068,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_C_Phase_Current >= 10 * input_phase_c_over_current_set_value:
                               print("Input Phase C Overcurrent (10x) detected! Waiting 1 sec before trip.")
                               time.sleep(1)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase C Overcurrent")
                               input_status = "Unhealthy"
@@ -1033,7 +1078,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_C_Phase_Current >= 5 * input_phase_c_over_current_set_value:
                               print("Input Phase C Overcurrent (5x) detected! Waiting 2.5 sec before trip.")
                               time.sleep(2.5)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase C Overcurrent")
                               input_status = "Unhealthy"
@@ -1043,7 +1088,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_C_Phase_Current >= 2 * input_phase_c_over_current_set_value:
                               print("Input Phase C Overcurrent (2x) detected! Waiting 5 sec before trip.")
                               time.sleep(5)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase C Overcurrent")
                               input_status = "Unhealthy"
@@ -1053,7 +1098,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_C_Phase_Current >= input_phase_c_over_current_set_value:
                               print("Input Phase C Overcurrent detected! Waiting 10 sec before trip.")
                               time.sleep(10)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input Phase C Overcurrent")
                               input_status = "Unhealthy"
@@ -1075,7 +1120,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          if output_A_Phase_Current >= 20 * output_phase_a_over_current_set_value:
                              print("Outpt Phase A Overcurrent (20x) detected! Waiting 0.5 sec before trip.")
                              time.sleep(0.5)
-                             GPIO.output(output_trip_pin, GPIO.LOW)
+                             GPIO.output(output_trip_pin, GPIO.HIGH)
                              GPIO.output(led_output, GPIO.HIGH)
                              print("trip on - Output Phase A Overcurrent")
                              output_status = "Unhealthy"
@@ -1085,7 +1130,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_A_Phase_Current >= 10 * output_phase_a_over_current_set_value:
                               print("Output Phase A Overcurrent (10x) detected! Waiting 1 sec before trip.")
                               time.sleep(1)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase A Overcurrent")
                               output_status = "Unhealthy"
@@ -1095,7 +1140,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_A_Phase_Current >= 5 * output_phase_a_over_current_set_value:
                               print("Output Phase A Overcurrent (5x) detected! Waiting 2.5 sec before trip.")
                               time.sleep(2.5)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase A Overcurrent")
                               output_status = "Unhealthy"
@@ -1105,7 +1150,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_A_Phase_Current >= 2 * output_phase_a_over_current_set_value:
                               print("Output Phase A Overcurrent (2x) detected! Waiting 5 sec before trip.")
                               time.sleep(5)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase A Overcurrent")
                               output_status = "Unhealthy"
@@ -1115,7 +1160,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_A_Phase_Current >= output_phase_a_over_current_set_value:
                               print("Output Phase A Overcurrent detected! Waiting 10 sec before trip.")
                               time.sleep(10)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase A Overcurrent")
                               output_status = "Unhealthy"
@@ -1136,7 +1181,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          if output_B_Phase_Current >= 20 * output_phase_b_over_current_set_value:
                              print("Output Phase B Overcurrent (20x) detected! Waiting 0.5 sec before trip.")
                              time.sleep(0.5)
-                             GPIO.output(output_trip_pin, GPIO.LOW)
+                             GPIO.output(output_trip_pin, GPIO.HIGH)
                              GPIO.output(led_output, GPIO.HIGH)
                              print("trip on - Output Phase B Overcurrent")
                              output_status = "Unhealthy"
@@ -1146,7 +1191,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_B_Phase_Current >= 10 * output_phase_b_over_current_set_value:
                               print("Output Phase B Overcurrent (10x) detected! Waiting 1 sec before trip.")
                               time.sleep(1)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase B Overcurrent")
                               output_status = "Unhealthy"
@@ -1156,7 +1201,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_B_Phase_Current >= 5 * output_phase_b_over_current_set_value:
                               print("Output Phase B Overcurrent (5x) detected! Waiting 2.5 sec before trip.")
                               time.sleep(2.5)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase B Overcurrent")
                               output_status = "Unhealthy"
@@ -1166,7 +1211,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_B_Phase_Current >= 2 * output_phase_b_over_current_set_value:
                               print("Output Phase B Overcurrent (2x) detected! Waiting 5 sec before trip.")
                               time.sleep(5)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase B Overcurrent")
                               output_status = "Unhealthy"
@@ -1176,7 +1221,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_B_Phase_Current >= output_phase_b_over_current_set_value:
                               print("Output Phase B Overcurrent detected! Waiting 10 sec before trip.")
                               time.sleep(10)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase B Overcurrent")
                               output_status = "Unhealthy"
@@ -1198,7 +1243,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          if output_C_Phase_Current >= 20 * output_phase_c_over_current_set_value:
                              print("Output Phase C Overcurrent (20x) detected! Waiting 0.5 sec before trip.")
                              time.sleep(0.5)
-                             GPIO.output(output_trip_pin, GPIO.LOW)
+                             GPIO.output(output_trip_pin, GPIO.HIGH)
                              GPIO.output(led_output, GPIO.HIGH)
                              print("trip on - Output Phase C Overcurrent")
                              output_status = "Unhealthy"
@@ -1208,7 +1253,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_C_Phase_Current >= 10 * output_phase_c_over_current_set_value:
                               print("Output Phase C Overcurrent (10x) detected! Waiting 1 sec before trip.")
                               time.sleep(1)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase C Overcurrent")
                               output_status = "Unhealthy"
@@ -1218,7 +1263,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_C_Phase_Current >= 5 * output_phase_c_over_current_set_value:
                               print("Output Phase C Overcurrent (5x) detected! Waiting 2.5 sec before trip.")
                               time.sleep(2.5)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase C Overcurrent")
                               output_status = "Unhealthy"
@@ -1228,7 +1273,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_C_Phase_Current >= 2 * output_phase_c_over_current_set_value:
                               print("Output Phase C Overcurrent (2x) detected! Waiting 5 sec before trip.")
                               time.sleep(5)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase C Overcurrent")
                               output_status = "Unhealthy"
@@ -1238,7 +1283,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_C_Phase_Current >= output_phase_c_over_current_set_value:
                               print("Output Phase C Overcurrent detected! Waiting 10 sec before trip.")
                               time.sleep(10)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output Phase C Overcurrent")
                               output_status = "Unhealthy"
@@ -1258,7 +1303,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          if input_DC_Current >= 20 * input_dc_over_current_set_value:
                              print("Input DC Overcurrent (20x) detected! Waiting 0.5 sec before trip.")
                              time.sleep(0.5)
-                             GPIO.output(input_trip_pin, GPIO.LOW)
+                             GPIO.output(input_trip_pin, GPIO.HIGH)
                              GPIO.output(led_input, GPIO.HIGH)
                              print("trip on - Input DC Overcurrent")
                              input_status = "Unhealthy"
@@ -1268,7 +1313,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_DC_Current >= 10 * input_dc_over_current_set_value:
                               print("Input DC Overcurrent (10x) detected! Waiting 1 sec before trip.")
                               time.sleep(1)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input DC Overcurrent")
                               input_status = "Unhealthy"
@@ -1278,7 +1323,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_DC_Current >= 5 * input_dc_over_current_set_value:
                               print("Input DC Overcurrent (5x) detected! Waiting 2.5 sec before trip.")
                               time.sleep(2.5)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input DC Overcurrent")
                               input_status = "Unhealthy"
@@ -1288,7 +1333,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_DC_Current >= 2 * input_dc_over_current_set_value:
                               print("Input DC Overcurrent (2x) detected! Waiting 5 sec before trip.")
                               time.sleep(5)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input DC Overcurrent")
                               input_status = "Unhealthy"
@@ -1298,7 +1343,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif input_DC_Current >= input_dc_over_current_set_value:
                               print("Input DC Overcurrent detected! Waiting 10 sec before trip.")
                               time.sleep(10)
-                              GPIO.output(input_trip_pin, GPIO.LOW)
+                              GPIO.output(input_trip_pin, GPIO.HIGH)
                               GPIO.output(led_input, GPIO.HIGH)
                               print("trip on - Input DC Overcurrent")
                               input_status = "Unhealthy"
@@ -1319,7 +1364,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          if output_DC_Current >= 20 * output_dc_over_current_set_value:
                              print("Output DC Overcurrent (20x) detected! Waiting 0.5 sec before trip.")
                              time.sleep(0.5)
-                             GPIO.output(output_trip_pin, GPIO.LOW)
+                             GPIO.output(output_trip_pin, GPIO.HIGH)
                              GPIO.output(led_output, GPIO.HIGH)
                              print("trip on - Output DC Overcurrent")
                              output_status = "Unhealthy"
@@ -1329,7 +1374,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_DC_Current >= 10 * output_dc_over_current_set_value:
                               print("Output DC Overcurrent (10x) detected! Waiting 1 sec before trip.")
                               time.sleep(1)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output DC Overcurrent")
                               output_status = "Unhealthy"
@@ -1339,7 +1384,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_DC_Current >= 5 * output_dc_over_current_set_value:
                               print("Output DC Overcurrent (5x) detected! Waiting 2.5 sec before trip.")
                               time.sleep(2.5)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output DC Overcurrent")
                               output_status = "Unhealthy"
@@ -1349,7 +1394,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_DC_Current >= 2 * output_dc_over_current_set_value:
                               print("Output DC Overcurrent (2x) detected! Waiting 5 sec before trip.")
                               time.sleep(5)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output DC Overcurrent")
                               output_status = "Unhealthy"
@@ -1359,7 +1404,7 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
                          elif output_DC_Current >= output_dc_over_current_set_value:
                               print("Output DC Overcurrent detected! Waiting 10 sec before trip.")
                               time.sleep(10)
-                              GPIO.output(output_trip_pin, GPIO.LOW)
+                              GPIO.output(output_trip_pin, GPIO.HIGH)
                               GPIO.output(led_output, GPIO.HIGH)
                               print("trip on - Output DC Overcurrent")
                               output_status = "Unhealthy"
@@ -1380,14 +1425,27 @@ def monitor_files(excel_path, sheet_name, excel_cells, input_csv, output_csv, in
             update_fault_log(relay_status, input_status, output_status, breaker_status, fault_type)
                
 
-            while GPIO.input(input_trip_pin) == GPIO.LOW or GPIO.input(output_trip_pin) == GPIO.LOW:
-                 if Reset_button == 1:
-                    GPIO.output(input_trip_pin, GPIO.HIGH)
-                    GPIO.output(output_trip_pin, GPIO.HIGH)
-                    GPIO.output(led_input, GPIO.LOW)
-                    GPIO.output(led_output, GPIO.LOW)
-                    print("Pins reset ")
-                    break
+            # --- Add Reset Button Handling (with debounce) ---
+            reset_btn_state = GPIO.input(reset_button_pin)
+            if reset_btn_state == GPIO.LOW:  # Button pressed (LOW due to pull-up)
+              start_time = time.time()
+                
+              while GPIO.input(reset_button_pin) == GPIO.LOW:  # Wait for button release
+                   time.sleep(0.05)  # Debounce delay
+                   if time.time() - start_time > 0.5:  # Check for sustained press (optional)
+                        pass  # Optional: Ignore short glitches
+                    # Reset relays and statuses
+                        GPIO.output(input_trip_pin, GPIO.HIGH)
+                        GPIO.output(output_trip_pin, GPIO.HIGH)
+                        GPIO.output(led_input, GPIO.LOW)
+                        GPIO.output(led_output, GPIO.LOW)
+                        relay_status = "Healthy and Operational"
+                        input_status = "Healthy"
+                        output_status = "Healthy"
+                        breaker_status = "Live"
+                        fault_type = "None"
+                        update_fault_log(relay_status, input_status, output_status, breaker_status, fault_type)
+                        print("Reset triggered via physical button")
  
                         
             time.sleep(interval)  # Wait before the next update

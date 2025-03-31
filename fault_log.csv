@@ -1,83 +1,161 @@
 Timestamp,Relay Status,Input Status,Output Status,Circuit Breaker Status,Fault Type
-2025-03-04 22:08:19,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:11,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:39,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:40,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:41,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:43,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:44,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:45,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:46,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:47,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:11:48,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase B Overvoltage
-2025-03-04 22:12:57,Unhealthy,Healthy,Healthy,Trip,Manual Trip
-2025-03-04 22:18:55,Healthy and Operational,Healthy,Unhealthy,Trip,Output Phase A Overvoltage
-2025-03-08 13:14:41,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:08,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:09,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:10,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:11,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:12,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:13,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:14,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:15,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:57,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:58,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:16:59,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:17:00,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:17:01,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:17:02,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:17:03,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:37,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:38,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:39,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:40,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:41,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:42,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:43,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:45,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:46,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:47,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:48,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:49,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:50,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:51,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:52,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:54,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:55,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:56,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 13:19:57,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:00:18,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:34:32,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:51:13,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:53:57,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:54:30,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:05:46,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:06:35,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:09:51,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:10:50,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:10:51,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:10:53,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:10:54,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:10:55,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:10:56,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:10:58,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:10:59,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:11:00,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:11:01,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:11:02,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:11:03,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:11:05,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-08 14:14:25,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overvoltage
-2025-03-09 23:07:43,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:09:48,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:10:16,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:10:45,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:12:11,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:19:51,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:20:15,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:20:44,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:21:14,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:26:24,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-09 23:27:13,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
-2025-03-10 01:27:06,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 10:37:57,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 10:37:58,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 10:38:00,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 10:38:00,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 10:58:19,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 10:58:19,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:06:12,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:13,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:14,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:15,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:16,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:17,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:19,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:20,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:21,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:22,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:23,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:24,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:25,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:26,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:33,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:34,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:35,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:36,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:06:39,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:06:39,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:06:48,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:06:48,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:06:49,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:06:49,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:36:58,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:36:58,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:37:01,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:37:01,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:38:59,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:39:00,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:39:01,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:39:02,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:39:03,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:39:04,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:39:05,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:39:10,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:39:10,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:40:54,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:40:55,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:40:57,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:41:02,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:41:02,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:56:06,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:07,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:08,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:09,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:10,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:12,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:13,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:14,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:15,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:16,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:17,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:18,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:19,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:20,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:22,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:23,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:24,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:25,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:26,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:27,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:28,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:29,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:31,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:32,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:33,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:34,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 11:56:38,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:56:38,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:56:46,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:56:47,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:56:51,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:56:51,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:57:03,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:57:03,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:57:06,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:57:06,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:59:09,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:59:09,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:59:15,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:59:15,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 11:59:58,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 11:59:58,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:01:12,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:01:12,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:01:14,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:01:14,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:01:28,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:01:28,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:01:31,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:01:31,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:01:37,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:01:38,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:01:39,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:01:40,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:01:41,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:01:43,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:01:44,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:01:44,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:15:15,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:15:15,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:15:35,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:15:35,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:15:46,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:15:48,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:15:49,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:15:50,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:15:51,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:15:52,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:15:53,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:15:54,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:15:55,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:15:56,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:15:57,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:29:48,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:29:48,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:29:53,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:29:53,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:29:59,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:00,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:01,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:02,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:03,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:04,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:05,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:30:05,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:30:25,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:30:25,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-28 12:30:29,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:30:29,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-28 12:30:39,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:41,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:42,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:43,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:44,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:45,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-28 12:30:46,Healthy and Operational,Unhealthy,Healthy,Trip,Input Phase A Overcurrent
+2025-03-29 13:11:35,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-29 13:11:35,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-29 13:11:39,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-29 13:11:39,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-29 19:18:02,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-29 19:18:02,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-29 19:18:06,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-29 19:18:06,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-29 19:26:39,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-29 19:26:39,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-29 19:26:43,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-29 19:26:43,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-29 19:26:49,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-29 19:26:49,Unhealthy,Healthy,Healthy,Trip,Manual Trip (Button)
+2025-03-29 19:26:51,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
+2025-03-29 19:26:51,Healthy and Operational,Healthy,Healthy,Rest,Manual Rest
